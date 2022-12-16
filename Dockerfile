@@ -2,8 +2,17 @@ FROM python:3.8
 ENV PYTHONUNBUFFERED=1
 WORKDIR /django
 
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+# COPY requirements.txt requirements.txt
+# RUN pip3 install -r requirements.txt
+
+ARG DEV_BUILD=true
+COPY requirements*.txt /tmp/
+RUN if [ "$DEV_BUILD" = "true" ]; then \
+        pip3 install -r /tmp/requirements-dev.txt --src /src; \
+    else \
+        pip3 install -r /tmp/requirements.txt --src /src; \
+    fi \
+    && rm /tmp/requirements*.txt
 
 COPY . .
 
