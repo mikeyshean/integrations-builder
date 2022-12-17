@@ -1,18 +1,15 @@
-from django.core.exceptions import ValidationError
-from integrations.models import Integration
-from django.db import IntegrityError
-from core.exceptions.service_exceptions import AlreadyExistsError
+from integrations.models import Integration, Category
+from core.exceptions import UnprocessableError
 
 class IntegrationService:
 
     @staticmethod
     def create(name: str, category_id: int) -> Integration:
-        try:
-            return Integration.objects.create(name=name, category_id=category_id)
-        except IntegrityError:
-            raise AlreadyExistsError(message=f"Integration already exists with this name: {name}")
+        category = Category.objects.filter(id=category_id).first()
+        if not category:
+            raise UnprocessableError(message="Invalid category")
+        return Integration.objects.create(name=name, category=category)
     
     @staticmethod
-    def get_by_name_and_category(name: str, category: str) -> Integration:
-        return Integration.objects.filter(name=name, category__name=category).first()
-
+    def get_by_id(id: int) -> Integration:
+        return Integration.objects.filter(id=id).first()

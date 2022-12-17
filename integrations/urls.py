@@ -1,6 +1,6 @@
-from django.urls import path
-from . import views
+from rest_framework.routers import SimpleRouter
+from integrations.views import IntegrationsViewSet
 
-urlpatterns=[
-  path('',views.index)
-]
+
+router = SimpleRouter(trailing_slash=False)
+router.register(r"integrations", IntegrationsViewSet, basename="integrations")
