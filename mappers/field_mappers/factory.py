@@ -17,11 +17,11 @@ class AbstractFieldMapper(ABC):
         pass
 
     @abstractmethod
-    def map_to_target(self, source_value):
+    def map_to_target(self, remote_value):
         pass
 
     @abstractmethod
-    def map_to_type(self, source_value):
+    def map_to_type(self, dto):
         pass
 
     def set_remote_field_id(self, id):
@@ -36,7 +36,7 @@ class AbstractFieldMapper(ABC):
 class ObjectFieldMapper(AbstractFieldMapper):
     type = FieldTypeChoices.OBJECT
 
-    def map_to_target(self, source_value: dict):
+    def map_to_target(self, remote_value: dict):
         result = {}
 
         remote_fields = self._get_fields_by_remote_model_id(self.remote_model_id)
@@ -55,7 +55,7 @@ class ObjectFieldMapper(AbstractFieldMapper):
                 remote_field["object_model_id"]
             )
             result[target_field_key] = field_mapper.map_to_target(
-                source_value[remote_field_key]
+                remote_value[remote_field_key]
             )
 
         return result
@@ -64,10 +64,10 @@ class ObjectFieldMapper(AbstractFieldMapper):
         remote_model = self.mapping_repository.get_remote_model_by_id(remote_model_id)
         return remote_model["fields"] or []
 
-    def map_to_type(self, source_value):
+    def map_to_type(self, dto):
         result = {"type": self.type, "properties": {}}
 
-        for k, v in source_value.items():
+        for k, v in dto.items():
             field_mapper = FieldMapperFactory(
                 self.mapping_repository
             ).get_mapper_by_value(v)
@@ -79,7 +79,7 @@ class ObjectFieldMapper(AbstractFieldMapper):
 class ListFieldMapper(AbstractFieldMapper):
     type = FieldTypeChoices.ARRAY
 
-    def map_to_target(self, source_value):
+    def map_to_target(self, remote_value):
         result = []
         remote_field = self.mapping_repository.get_remote_field_by_id(
             self.remote_field_id
@@ -90,17 +90,17 @@ class ListFieldMapper(AbstractFieldMapper):
         )
         field_mapper.set_remote_model_id(remote_field["object_model_id"])
 
-        for value in source_value:
+        for value in remote_value:
             result.append(field_mapper.map_to_target(value))
 
         return result
 
-    def map_to_type(self, source_value):
+    def map_to_type(self, dto):
         result = {
             "type": self.type,
         }
 
-        item = next(iter(source_value), None)
+        item = next(iter(dto), None)
         field_mapper = FieldMapperFactory(self.mapping_repository).get_mapper_by_value(
             item
         )
@@ -110,10 +110,10 @@ class ListFieldMapper(AbstractFieldMapper):
 
 
 class PrimitiveFieldMapper(AbstractFieldMapper):
-    def map_to_target(self, source_value):
-        return source_value
+    def map_to_target(self, remote_value):
+        return remote_value
 
-    def map_to_type(self, source_value):
+    def map_to_type(self, dto):
         return {"type": self.type}
 
 

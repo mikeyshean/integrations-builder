@@ -18,9 +18,9 @@ class MapperService:
         Returns:
             dict: Target dto representation
         """
-        field_mapper = self.field_mapper_factory.get_mapper_by_field_value(remote_dto)
+        field_mapper = self.field_mapper_factory.get_mapper_by_value(remote_dto)
         field_mapper.set_remote_model_id(remote_model_id)
-        return field_mapper.map_to_target(source_field_value=remote_dto)
+        return field_mapper.map_to_target(remote_value=remote_dto)
 
     def map_to_types(self, remote_dto: dict) -> dict:
         """Maps an example model to its type structure, similar to JSON Schema
@@ -32,7 +32,7 @@ class MapperService:
             dict: Dictionary with field names and type data
         """
         field_mapper = self.field_mapper_factory.get_mapper_by_value(remote_dto)
-        return field_mapper.map_to_type(source_value=remote_dto)
+        return field_mapper.map_to_type(dto=remote_dto)
 
     def create_models_and_fields_from_type_map(
         self, type_map: dict, target: bool, model_name: str = "Root"
