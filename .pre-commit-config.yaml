@@ -12,6 +12,11 @@ repos:
     hooks:
       - id: flake8
         language_version: python3.8
+        exclude: |
+          (?x)(
+              /migrations/|
+              core/settings
+          )
         args: ['--max-line-length=88']
       - id: fix-encoding-pragma
         args: ['--remove']
