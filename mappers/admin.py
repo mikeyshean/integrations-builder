@@ -2,17 +2,13 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from mappers.models import Field, Model
+from mappers.models import Field, Model, Transformer
 
 
 class FieldInline(admin.TabularInline):
     model = Field
     fk_name = "model"
     exclude = ("created", "modified")
-    # can_delete = False
-    # verbose_name = 'Field'
-    # verbose_name_plural = 'Fields'
-    # extra = 0
 
 
 @admin.register(Model)
@@ -47,3 +43,34 @@ class ModelAdmin(admin.ModelAdmin):
             )
 
     target_model_links.short_description = "target_model"
+
+
+@admin.register(Field)
+class FieldAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "id",
+        "name",
+        "type",
+        "choices",
+        "list_item_type",
+        "object_model",
+        "target_field",
+        "transformer",
+    )
+    list_display_links = (
+        "id",
+        "name",
+        "object_model",
+        "target_field",
+        "transformer",
+    )
+    exclude = ("created", "modified")
+
+
+@admin.register(Transformer)
+class TransformerAdmin(admin.ModelAdmin):
+
+    list_display = ("type",)
+    list_display_links = ("type",)
+    exclude = ("created", "modified")

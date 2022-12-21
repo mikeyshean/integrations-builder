@@ -15,8 +15,6 @@ class ModelFieldService:
         obj = Model(name=name, is_remote=is_remote, target_model_id=target_model_id)
         obj.full_clean()
         obj.save()
-        print(obj)
-
         return obj
 
     def create_field(
@@ -29,7 +27,6 @@ class ModelFieldService:
         obj = Field(model_id=model_id, name=name, type=type)
         obj.full_clean()
         obj.save()
-        print(obj)
         return obj
 
     def update_field(self, *, field_id: int, **kwargs) -> Field:

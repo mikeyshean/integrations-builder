@@ -15,9 +15,31 @@ class Model(TimestampedModel):
         return f"{self.__class__.__name__}(id: {self.id}, name: {self.name})"
 
 
+class TransformerTypeChoices(models.TextChoices):
+    UPPERCASE = "UPPERCASE", _("Uppercase")
+    LOWERCASE = "LOWERCASE", _("Lowercase")
+    CAPITALIZE = "CAPITALIZE", _("Captalize")
+    STRING_TO_FLOAT = "STRING_TO_FLOAT", _("String to Float")
+    STRING_TO_INTEGER = "STRING_TO_INTEGER", _("String to Integer")
+    STRING_TO_BOOLEAN = "STRING_TO_BOOLEAN", _("String to Boolean")
+    NUMBER_TO_STRING = "NUMBER_TO_STRING", _("Number to String")
+
+
+class Transformer(TimestampedModel):
+    type = models.CharField(
+        max_length=64,
+        choices=TransformerTypeChoices.choices,
+        null=False,
+        help_text="Name of the transformer type",
+    )
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}(type: {self.type})"
+
+
 class FieldTypeChoices(models.TextChoices):
     OBJECT = "OBJECT", _("Object")
-    ARRAY = "ARRAY", _("Array")
+    LIST = "LIST", _("List")
     STRING = "STRING", _("String")
     NUMBER = "NUMBER", _("Number")
     BOOLEAN = "BOOLEAN", _("Boolean")
@@ -64,6 +86,14 @@ class Field(TimestampedModel):
         blank=True,
         help_text="Reference to the target field that this remote field maps to",
     )
+    transformer = models.ForeignKey(
+        "Transformer",
+        on_delete=models.CASCADE,
+        related_name="+",
+        null=True,
+        blank=True,
+        help_text="Reference to the transformer for this field",
+    )
 
     class Meta:
         constraints = [
@@ -85,6 +115,9 @@ class Field(TimestampedModel):
 
     def get_list_item_type(self) -> FieldTypeChoices:
         return FieldTypeChoices[self.list_item_type]
+
+    def is_transformable(self) -> bool:
+        return self.transformer_id is not None
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(id: {self.id}, name: {self.name})"

@@ -1,15 +1,21 @@
 import json
 
-from mappers.repository import MappingRepository
-from mappers.services.json_mapper.factory import JSONMapperFactory
-from mappers.services.json_mapper.json_mapper_service import JSONMapperService
+from mappers.json_mappers import JSONMapperFactory
+from mappers.services.json_mapper_service import JSONMapperService
 from mappers.services.model_field_service import ModelFieldService
+from mappers.services.transformer_service import TransformerService
+from mappers.transformers import FieldTransformerFactory
 
 
 class MapperEventHandlers:
     @staticmethod
     def map_to_target_handler(event: dict):
-        field_mapper_factory = JSONMapperFactory(MappingRepository())
+        transformer_service = TransformerService(
+            transformer_factory=FieldTransformerFactory()
+        )
+        field_mapper_factory = JSONMapperFactory(
+            transformer_service=transformer_service
+        )
         json_mapper_service = JSONMapperService(
             field_mapper_factory, ModelFieldService()
         )
@@ -22,7 +28,12 @@ class MapperEventHandlers:
 
     @staticmethod
     def map_to_json_types_handler(event: dict):
-        field_mapper_factory = JSONMapperFactory(MappingRepository())
+        transformer_service = TransformerService(
+            transformer_factory=FieldTransformerFactory()
+        )
+        field_mapper_factory = JSONMapperFactory(
+            transformer_service=transformer_service
+        )
         json_mapper_service = JSONMapperService(
             field_mapper_factory, ModelFieldService()
         )
