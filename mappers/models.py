@@ -7,8 +7,9 @@ from core.models import TimestampedModel
 class Model(TimestampedModel):
     name = models.CharField(max_length=64, help_text="Name of the model")
     target_model = models.ForeignKey(
-        "Model", on_delete=models.CASCADE, related_name="+", null=True, blank=False
+        "Model", on_delete=models.CASCADE, related_name="+", null=True, blank=True
     )
+    is_remote = models.BooleanField(null=False, default=True)
 
     def __str__(self) -> str:
         return str({"id": self.id, "name": self.name})
@@ -20,6 +21,7 @@ class FieldTypeChoices(models.TextChoices):
     STRING = "STRING", _("String")
     NUMBER = "NUMBER", _("Number")
     BOOLEAN = "BOOLEAN", _("Boolean")
+    UNKNOWN = "UNKNOWN", _("Unknown")
 
 
 class Field(TimestampedModel):
@@ -30,11 +32,13 @@ class Field(TimestampedModel):
         help_text="Name of the field type",
     )
     choices = models.JSONField(
-        null=True, help_text="List of enum choices for this field"
+        null=True, blank=True, help_text="List of enum choices for this field"
     )
     list_item_type = models.CharField(
         max_length=32,
         choices=FieldTypeChoices.choices,
+        null=True,
+        blank=True,
         help_text="Name of list item's type",
     )
     object_model = models.ForeignKey(
@@ -42,6 +46,7 @@ class Field(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="+",
         null=True,
+        blank=True,
         help_text="Reference to a model if this field's value is another model",
     )
     model = models.ForeignKey(
@@ -52,7 +57,13 @@ class Field(TimestampedModel):
         blank=False,
         help_text="Reference to the model that this field belongs to",
     )
-    target_field = models.ForeignKey("Field", on_delete=models.CASCADE, null=True)
+    target_field = models.ForeignKey(
+        "Field",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="Reference to the target field that this remote field maps to",
+    )
 
     class Meta:
         constraints = [
@@ -64,6 +75,16 @@ class Field(TimestampedModel):
                 check=models.Q(type__in=FieldTypeChoices.values),
             ),
         ]
+
+    @staticmethod
+    def get_update_fields():
+        return ["name", "type", "list_item_type", "object_model_id", "target_field_id"]
+
+    def get_type(self) -> FieldTypeChoices:
+        return FieldTypeChoices[self.type]
+
+    def get_list_item_type(self) -> FieldTypeChoices:
+        return FieldTypeChoices[self.list_item_type]
 
     def __str__(self) -> str:
         return str({"id": self.id, "name": self.name})

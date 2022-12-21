@@ -1,16 +1,19 @@
 import json
 
-from mappers.field_mappers.factory import FieldMapperFactory
 from mappers.repository import MappingRepository
-from mappers.service import MapperService
+from mappers.services.json_mapper.factory import JSONMapperFactory
+from mappers.services.json_mapper.json_mapper_service import JSONMapperService
+from mappers.services.model_field_service import ModelFieldService
 
 
 class MapperEventHandlers:
     @staticmethod
     def map_to_target_handler(event: dict):
-        field_mapper_factory = FieldMapperFactory(MappingRepository())
-        mapper_service = MapperService(field_mapper_factory)
-        dto = mapper_service.map_to_target_dto(
+        field_mapper_factory = JSONMapperFactory(MappingRepository())
+        json_mapper_service = JSONMapperService(
+            field_mapper_factory, ModelFieldService()
+        )
+        dto = json_mapper_service.map_to_target_dto(
             remote_dto=event["data"], remote_model_id=event["remote_model_id"]
         )
 
@@ -18,10 +21,12 @@ class MapperEventHandlers:
         return dto
 
     @staticmethod
-    def map_to_types_handler(event: dict):
-        field_mapper_factory = FieldMapperFactory(MappingRepository())
-        mapper_service = MapperService(field_mapper_factory)
-        dto = mapper_service.map_to_types(remote_dto=event["data"])
+    def map_to_json_types_handler(event: dict):
+        field_mapper_factory = JSONMapperFactory(MappingRepository())
+        json_mapper_service = JSONMapperService(
+            field_mapper_factory, ModelFieldService()
+        )
+        dto = json_mapper_service.map_to_json_types(json_dto=event["data"])
 
         print(f"Generated Types:\n{json.dumps(dto, indent=4)}")
         return dto
