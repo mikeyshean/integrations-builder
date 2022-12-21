@@ -12,7 +12,7 @@ class Model(TimestampedModel):
     is_remote = models.BooleanField(null=False, default=True)
 
     def __str__(self) -> str:
-        return str({"id": self.id, "name": self.name})
+        return f"{self.__class__.__name__}(id: {self.id}, name: {self.name})"
 
 
 class FieldTypeChoices(models.TextChoices):
@@ -87,4 +87,4 @@ class Field(TimestampedModel):
         return FieldTypeChoices[self.list_item_type]
 
     def __str__(self) -> str:
-        return str({"id": self.id, "name": self.name})
+        return f"{self.__class__.__name__}(id: {self.id}, name: {self.name})"
