@@ -35,11 +35,12 @@ class MapperEventHandlers:
         transformer_service = TransformerService(
             transformer_factory=FieldTransformerFactory()
         )
-        field_mapper_factory = JSONMapperFactory(
-            transformer_service=transformer_service
+        json_mapper_factory = JSONMapperFactory(
+            map_service=MapService(transformer_service=transformer_service)
         )
         json_mapper_service = JSONMapperService(
-            field_mapper_factory, ModelFieldService()
+            json_mapper_factory=json_mapper_factory,
+            model_field_service=ModelFieldService(),
         )
         dto = json_mapper_service.map_to_json_types(json_dto=event["data"])
 
