@@ -1,7 +1,8 @@
 from django.db import transaction
 
+from mappers.constants import JSON_TYPE_TO_FIELD_TYPE, JSONType
+from mappers.json_mappers import JSONMapperFactory
 from mappers.models import Field, FieldTypeChoices, Model
-from mappers.services.json_mapper.factory import JSONMapperFactory
 from mappers.services.model_field_service import ModelFieldService
 
 
@@ -39,7 +40,7 @@ class JSONMapperService:
             dict: Dictionary with field names and type data
         """
         field_mapper = self.field_mapper_factory.get_mapper_by_value(json_dto)
-        return field_mapper.map_to_json_type(dto=json_dto)
+        return field_mapper.map_to_json_type_definition(dto=json_dto)
 
     @transaction.atomic
     def create_models_and_fields_from_type_map(
@@ -71,12 +72,12 @@ class JSONMapperService:
     def _create_field_from_type_map(
         self, model_id, field_name, type_map, is_remote
     ) -> Field:
-        type = self._get_field_type_from_json_type(type_map["type"])
+        type = self._get_field_type_from_json_type(JSONType(type_map["type"]))
         field = self.model_field_service.create_field(
             name=field_name, type=type, model_id=model_id
         )
 
-        if type is FieldTypeChoices.ARRAY:
+        if type is FieldTypeChoices.LIST:
             field = self._update_array_field(field_name, type_map, field.id, is_remote)
         elif type is FieldTypeChoices.OBJECT:
             field = self._update_object_field(field_name, type_map, field.id, is_remote)
@@ -92,7 +93,9 @@ class JSONMapperService:
         )
 
     def _update_array_field(self, field_name, type_map, field_id, is_remote) -> Field:
-        item_type = self._get_field_type_from_json_type(type_map["items"]["type"])
+        item_type = self._get_field_type_from_json_type(
+            JSONType(type_map["items"]["type"])
+        )
         field = self.model_field_service.update_field(
             field_id=field_id, list_item_type=item_type, is_remote=is_remote
         )
@@ -107,5 +110,5 @@ class JSONMapperService:
             )
         return field
 
-    def _get_field_type_from_json_type(self, type: str) -> FieldTypeChoices:
-        return FieldTypeChoices[type.upper()]
+    def _get_field_type_from_json_type(self, type: JSONType) -> FieldTypeChoices:
+        return JSON_TYPE_TO_FIELD_TYPE[type]

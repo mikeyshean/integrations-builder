@@ -15,8 +15,6 @@ class ModelFieldService:
         obj = Model(name=name, is_remote=is_remote, target_model_id=target_model_id)
         obj.full_clean()
         obj.save()
-        print(obj)
-
         return obj
 
     def create_field(
@@ -29,7 +27,6 @@ class ModelFieldService:
         obj = Field(model_id=model_id, name=name, type=type)
         obj.full_clean()
         obj.save()
-        print(obj)
         return obj
 
     def update_field(self, *, field_id: int, **kwargs) -> Field:
@@ -48,14 +45,22 @@ class ModelFieldService:
         field.save(update_fields=update_fields)
         return field
 
-    def get_model_by_id(self, id: int) -> Field:
-        return Model.objects.filter(id=id).first()
+    def get_model_by_id(self, model_id: int) -> Field:
+        return Model.objects.filter(id=model_id).first()
 
-    def get_field_by_id(self, id: int) -> Field:
-        return Field.objects.filter(id=id).first()
+    def get_field_by_id(self, field_id: int) -> Field:
+        return Field.objects.filter(id=field_id).first()
 
-    def get_target_field_from_remote_id(self, remote_id: int) -> Field:
+    def get_fields_by_model_id(self, model_id: int):
+        model = self.get_model_by_id(model_id)
+        if not model:
+            raise NotFoundError("Model could not be found")
+        return list(model.fields.all())
+
+    def get_target_field_from_remote_field_id(self, remote_field_id: int) -> Field:
         field = (
-            Field.objects.filter(id=remote_id).select_related("target_field").first()
+            Field.objects.filter(id=remote_field_id)
+            .select_related("target_field")
+            .first()
         )
         return field.target_field if field else None

@@ -2,10 +2,12 @@ import pytest
 from django.test import TestCase
 
 from mappers.events.event_handlers import MapperEventHandlers
-from mappers.models import Model
-from mappers.services.json_mapper.factory import JSONMapperFactory
-from mappers.services.json_mapper.json_mapper_service import JSONMapperService
+from mappers.field_transformers import FieldTransformerFactory
+from mappers.json_mappers import JSONMapperFactory
+from mappers.models import Model, Transformer, TransformerTypeChoices
+from mappers.services.json_mapper_service import JSONMapperService
 from mappers.services.model_field_service import ModelFieldService
+from mappers.services.transformer_service import TransformerService
 
 
 @pytest.mark.django_db
@@ -15,11 +17,20 @@ class TestMapperEventHandlers(TestCase):
     """
 
     def setUp(self):
+        transformer_service = TransformerService(
+            transformer_factory=FieldTransformerFactory
+        )
         self.json_mapper_service = JSONMapperService(
-            JSONMapperFactory(), ModelFieldService()
+            field_mapper_factory=JSONMapperFactory(
+                transformer_service=transformer_service
+            ),
+            model_field_service=ModelFieldService(),
         )
         self._create_target_model()
         self._create_remote_model()
+        self.upppercase_transformer = Transformer.objects.create(
+            type=TransformerTypeChoices.UPPERCASE
+        )
         self._create_remote_to_target_mappings(self.remote_model, self.target_model)
         self.event = {
             "data": {
@@ -91,6 +102,8 @@ class TestMapperEventHandlers(TestCase):
             target_field_name = "target_" + remote_field.name
             target_field = target_model.fields.get(name=target_field_name)
             remote_field.target_field_id = target_field.id
+            if remote_field.name == "first_name":
+                remote_field.transformer = self.upppercase_transformer
             remote_field.save()
             if remote_field.object_model_id:
                 self._create_remote_to_target_mappings(
@@ -101,7 +114,7 @@ class TestMapperEventHandlers(TestCase):
         response = MapperEventHandlers.map_to_target_handler(self.event)
         expected_response = {
             "target_id": 123456,
-            "target_first_name": "Mike",
+            "target_first_name": "MIKE",  # Transformed field
             "target_last_name": "Shean",
             "target_date_of_birth": "1990-11-10T00:00:00Z",
             "target_skills": [
