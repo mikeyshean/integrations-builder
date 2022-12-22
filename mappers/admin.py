@@ -42,7 +42,7 @@ class ModelAdmin(admin.ModelAdmin):
                 )
             )
 
-    target_model_links.short_description = "target_model"
+    target_model_links.short_description = "target model"
 
 
 @admin.register(Field)
@@ -54,18 +54,57 @@ class FieldAdmin(admin.ModelAdmin):
         "type",
         "choices",
         "list_item_type",
-        "object_model",
-        "target_field",
-        "transformer",
+        "object_model_link",
+        "target_field_link",
+        "transformer_link",
     )
     list_display_links = (
         "id",
         "name",
-        "object_model",
-        "target_field",
-        "transformer",
+        "object_model_link",
+        "target_field_link",
+        "transformer_link",
     )
     exclude = ("created", "modified")
+
+    def object_model_link(self, model):
+        if model.object_model:
+            return mark_safe(
+                '<a href="{}">{}</a>'.format(
+                    reverse(
+                        "admin:mappers_model_change", args=(model.object_model_id,)
+                    ),
+                    model.object_model.name,
+                )
+            )
+
+    object_model_link.short_description = "object model"
+
+    def target_field_link(self, model):
+        if model.target_field:
+            return mark_safe(
+                '<a href="{}">{}</a>'.format(
+                    reverse(
+                        "admin:mappers_field_change", args=(model.target_field_id,)
+                    ),
+                    model.target_field.name,
+                )
+            )
+
+    target_field_link.short_description = "target field"
+
+    def transformer_link(self, model):
+        if model.transformer:
+            return mark_safe(
+                '<a href="{}">{}</a>'.format(
+                    reverse(
+                        "admin:mappers_transformer_change", args=(model.transformer_id,)
+                    ),
+                    model.transformer.type,
+                )
+            )
+
+    transformer_link.short_description = "transformer"
 
 
 @admin.register(Transformer)
