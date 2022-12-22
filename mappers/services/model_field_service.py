@@ -1,5 +1,3 @@
-from typing import Optional
-
 from mappers.exceptions import NotFoundError
 from mappers.models import Field, FieldTypeChoices, Model
 
@@ -9,10 +7,8 @@ class ModelFieldService:
         self,
         *,
         name: str = "",
-        is_remote: bool = True,
-        target_model_id: Optional[int] = None
     ) -> Model:
-        obj = Model(name=name, is_remote=is_remote, target_model_id=target_model_id)
+        obj = Model(name=name)
         obj.full_clean()
         obj.save()
         return obj
@@ -22,7 +18,7 @@ class ModelFieldService:
         *,
         model_id: int,
         name: str = "",
-        type: FieldTypeChoices = FieldTypeChoices.UNKNOWN
+        type: FieldTypeChoices = FieldTypeChoices.UNKNOWN,
     ) -> Field:
         obj = Field(model_id=model_id, name=name, type=type)
         obj.full_clean()

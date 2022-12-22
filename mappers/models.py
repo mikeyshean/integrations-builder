@@ -6,13 +6,25 @@ from core.models import TimestampedModel
 
 class Model(TimestampedModel):
     name = models.CharField(max_length=64, help_text="Name of the model")
-    target_model = models.ForeignKey(
-        "Model", on_delete=models.CASCADE, related_name="+", null=True, blank=True
-    )
-    is_remote = models.BooleanField(null=False, default=True)
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(id: {self.id}, name: {self.name})"
+
+
+class Map(TimestampedModel):
+    source_model = models.ForeignKey(
+        "Model", on_delete=models.CASCADE, related_name="+", null=False
+    )
+    target_model = models.ForeignKey(
+        "Model", on_delete=models.CASCADE, related_name="+", null=False
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_model", "target_model"], name="unique_source_and_target"
+            )
+        ]
 
 
 class TransformerTypeChoices(models.TextChoices):
@@ -79,26 +91,11 @@ class Field(TimestampedModel):
         blank=False,
         help_text="Reference to the model that this field belongs to",
     )
-    target_field = models.ForeignKey(
-        "Field",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        help_text="Reference to the target field that this remote field maps to",
-    )
-    transformer = models.ForeignKey(
-        "Transformer",
-        on_delete=models.CASCADE,
-        related_name="+",
-        null=True,
-        blank=True,
-        help_text="Reference to the transformer for this field",
-    )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["model_id", "name"], name="unique_model_and_field_name"
+                fields=["model", "name"], name="unique_model_and_field_name"
             ),
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_type_valid",
@@ -121,3 +118,46 @@ class Field(TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(id: {self.id}, name: {self.name})"
+
+
+class ModelMap(TimestampedModel):
+    source_model = models.ForeignKey(
+        "Model", on_delete=models.CASCADE, related_name="+", null=False
+    )
+    target_model = models.ForeignKey(
+        "Model", on_delete=models.CASCADE, related_name="+", null=False
+    )
+    map = models.ForeignKey(
+        "Map", on_delete=models.CASCADE, related_name="+", null=False
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_model", "map", "target_model"],
+                name="%(app_label)s_%(class)s_unique_source_map_target",
+            )
+        ]
+
+
+class FieldMap(TimestampedModel):
+    source_field = models.ForeignKey(
+        "Field", on_delete=models.CASCADE, related_name="+", null=False
+    )
+    target_field = models.ForeignKey(
+        "Field", on_delete=models.CASCADE, related_name="+", null=False
+    )
+    map = models.ForeignKey(
+        "Map", on_delete=models.CASCADE, related_name="+", null=False
+    )
+    transformer = models.ForeignKey(
+        "Transformer", on_delete=models.CASCADE, related_name="+", null=True, blank=True
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_field", "map", "target_field"],
+                name="%(app_label)s_%(class)s_unique_source_map_target",
+            )
+        ]
