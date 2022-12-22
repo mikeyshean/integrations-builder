@@ -65,32 +65,43 @@ class JSONMapper(ABC):
 class ObjectMapper(JSONMapper):
     type = FieldTypeChoices.OBJECT
 
-    def map_to_target(self, remote_value: dict):
-        result = {}
+    def map_to_target(self, remote_value: dict) -> dict:
+        """Maps a remote data dict into the target model dict \
+            This will be the usual entry point to recursively build \
+            a complete target dto as we get a new mapper and call \
+            `map_to_target` on each property of `remote_value`
 
-        remote_fields = self._get_fields_by_remote_model_id(self.remote_model_id)
+        Args:
+            remote_value (dict): Remote dict to be mapped into target dto
+
+        Returns:
+            dict: target model dto
+        """
+
+        result = {}
+        remote_fields = self._model_field_service.get_fields_by_model_id(
+            self.remote_model_id
+        )
 
         for remote_field in remote_fields:
-            target_field = self._model_field_service.get_target_field_from_remote_id(
-                remote_field.id
-            )
-            target_field_key = target_field.name
-            remote_field_key = remote_field.name
             field_mapper = JSONMapperFactory(
                 self._transformer_service, self._model_field_service
             ).get_mapper_by_type(remote_field.get_type())
+
             field_mapper.set_remote_field_id(remote_field.id).set_remote_model_id(
                 remote_field.object_model_id
             )
-            result[target_field_key] = field_mapper.map_to_target(
-                remote_value[remote_field_key]
+
+            target_field = (
+                self._model_field_service.get_target_field_from_remote_field_id(
+                    remote_field.id
+                )
+            )
+            result[target_field.name] = field_mapper.map_to_target(
+                remote_value[remote_field.name]
             )
 
         return result
-
-    def _get_fields_by_remote_model_id(self, remote_model_id):
-        remote_model = self._model_field_service.get_model_by_id(remote_model_id)
-        return remote_model.fields.all() or []
 
     def map_to_json_type_definition(self, dto):
         result = {"type": self.get_json_type(), "properties": {}}
