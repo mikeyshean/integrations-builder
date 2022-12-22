@@ -2,12 +2,12 @@ import pytest
 from django.test import TestCase
 
 from mappers.events.event_handlers import MapperEventHandlers
+from mappers.field_transformers import FieldTransformerFactory
 from mappers.json_mappers import JSONMapperFactory
 from mappers.models import Model, Transformer, TransformerTypeChoices
 from mappers.services.json_mapper_service import JSONMapperService
 from mappers.services.model_field_service import ModelFieldService
 from mappers.services.transformer_service import TransformerService
-from mappers.transformers import FieldTransformerFactory
 
 
 @pytest.mark.django_db

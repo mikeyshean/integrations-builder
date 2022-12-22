@@ -1,10 +1,10 @@
 import json
 
+from mappers.field_transformers import FieldTransformerFactory
 from mappers.json_mappers import JSONMapperFactory
 from mappers.services.json_mapper_service import JSONMapperService
 from mappers.services.model_field_service import ModelFieldService
 from mappers.services.transformer_service import TransformerService
-from mappers.transformers import FieldTransformerFactory
 
 
 class MapperEventHandlers:

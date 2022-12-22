@@ -1,8 +1,8 @@
 from typing import Any
 
 from mappers.exceptions import NotFoundError
+from mappers.field_transformers import FieldTransformerFactory
 from mappers.models import Transformer
-from mappers.transformers import FieldTransformerFactory
 
 
 class TransformerService:
