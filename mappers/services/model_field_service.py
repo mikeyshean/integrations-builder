@@ -1,3 +1,5 @@
+from typing import List
+
 from mappers.exceptions import NotFoundError
 from mappers.models import Field, FieldTypeChoices, Model
 
@@ -47,7 +49,7 @@ class ModelFieldService:
     def get_field_by_id(self, field_id: int) -> Field:
         return Field.objects.filter(id=field_id).first()
 
-    def get_fields_by_model_id(self, model_id: int):
+    def get_fields_by_model_id(self, model_id: int) -> List[Field]:
         model = self.get_model_by_id(model_id)
         if not model:
             raise NotFoundError("Model could not be found")

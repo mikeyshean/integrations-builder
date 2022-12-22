@@ -4,23 +4,20 @@ from typing import Any, TypeVar
 from mappers.constants import FIELD_TYPE_TO_JSON_TYPE
 from mappers.exceptions import InvalidType
 from mappers.models import Field, FieldTypeChoices
+from mappers.services.map_service import MapService
 from mappers.services.model_field_service import ModelFieldService
-from mappers.services.transformer_service import TransformerService
 
 T = TypeVar("T", bound="JSONMapper")
 
 
 class JSONMapper(ABC):
-    def __init__(
-        self,
-        transformer_service: TransformerService,
-        model_field_service: ModelFieldService,
-    ):
-        self._transformer_service = transformer_service
-        self._model_field_service = model_field_service
-        self._remote_field_id = None
-        self._remote_model_id = None
-        self._remote_field = None
+    def __init__(self, model_field_service: ModelFieldService, map_service: MapService):
+        self.model_field_service = model_field_service
+        self.map_service = map_service
+        self._source_field_id = None
+        self._source_model_id = None
+        self._source_field = None
+        self._map_id = None
 
     @property
     @abstractmethod
@@ -28,7 +25,7 @@ class JSONMapper(ABC):
         pass
 
     @abstractmethod
-    def map_to_target(self, remote_value):
+    def map_to_target(self, source_value):
         pass
 
     @abstractmethod
@@ -36,26 +33,34 @@ class JSONMapper(ABC):
         pass
 
     @property
-    def remote_field_id(self) -> int:
-        return self._remote_field_id
+    def source_field_id(self) -> int:
+        return self._source_field_id
 
     @property
-    def remote_model_id(self) -> int:
-        return self._remote_model_id
+    def source_model_id(self) -> int:
+        return self._source_model_id
 
     @property
-    def remote_field(self) -> Field:
-        result = self._remote_field
+    def source_field(self) -> Field:
+        result = self._source_field
         if not result:
-            result = self._model_field_service.get_field_by_id(self.remote_field_id)
+            result = self.model_field_service.get_field_by_id(self.source_field_id)
         return result
 
-    def set_remote_model_id(self: T, id: int) -> T:
-        self._remote_model_id = id
+    @property
+    def map_id(self) -> int:
+        return self._map_id
+
+    def set_source_model_id(self: T, id: int) -> T:
+        self._source_model_id = id
         return self
 
-    def set_remote_field_id(self: T, id) -> T:
-        self._remote_field_id = id
+    def set_source_field_id(self: T, id: int) -> T:
+        self._source_field_id = id
+        return self
+
+    def set_map_id(self: T, id: int) -> T:
+        self._map_id = id
         return self
 
     def get_json_type(self: T) -> str:
@@ -65,40 +70,39 @@ class JSONMapper(ABC):
 class ObjectMapper(JSONMapper):
     type = FieldTypeChoices.OBJECT
 
-    def map_to_target(self, remote_value: dict) -> dict:
-        """Maps a remote data dict into the target model dict \
+    def map_to_target(self, source_value: dict) -> dict:
+        """Maps a source data dict into the target model dict \
             This will be the usual entry point to recursively build \
             a complete target dto as we get a new mapper and call \
-            `map_to_target` on each property of `remote_value`
+            `map_to_target` on each property of `source_value`
 
         Args:
-            remote_value (dict): Remote dict to be mapped into target dto
+            source_value (dict): Source dict to be mapped into target dto
 
         Returns:
             dict: target model dto
         """
 
         result = {}
-        remote_fields = self._model_field_service.get_fields_by_model_id(
-            self.remote_model_id
+        source_fields = self.model_field_service.get_fields_by_model_id(
+            self.source_model_id
         )
 
-        for remote_field in remote_fields:
+        for source_field in source_fields:
             field_mapper = JSONMapperFactory(
-                self._transformer_service, self._model_field_service
-            ).get_mapper_by_type(remote_field.get_type())
+                model_field_service=self.model_field_service,
+                map_service=self.map_service,
+            ).get_mapper_by_type(source_field.get_type())
 
-            field_mapper.set_remote_field_id(remote_field.id).set_remote_model_id(
-                remote_field.object_model_id
-            )
+            field_mapper.set_source_field_id(source_field.id).set_source_model_id(
+                source_field.object_model_id
+            ).set_map_id(self.map_id)
 
-            target_field = (
-                self._model_field_service.get_target_field_from_remote_field_id(
-                    remote_field.id
-                )
+            target_field = self.map_service.get_target_field(
+                source_field=source_field, map_id=self.map_id
             )
             result[target_field.name] = field_mapper.map_to_target(
-                remote_value[remote_field.name]
+                source_value[source_field.name]
             )
 
         return result
@@ -108,7 +112,8 @@ class ObjectMapper(JSONMapper):
 
         for k, v in dto.items():
             field_mapper = JSONMapperFactory(
-                self._transformer_service, self._model_field_service
+                model_field_service=self.model_field_service,
+                map_service=self.map_service,
             ).get_mapper_by_value(v)
             result["properties"][k] = field_mapper.map_to_json_type_definition(v)
 
@@ -118,17 +123,17 @@ class ObjectMapper(JSONMapper):
 class ListMapper(JSONMapper):
     type = FieldTypeChoices.LIST
 
-    def map_to_target(self, remote_value):
+    def map_to_target(self, source_value):
         result = []
-        remote_field = self._model_field_service.get_field_by_id(self.remote_field_id)
+        source_field = self.model_field_service.get_field_by_id(self.source_field_id)
         field_mapper = JSONMapperFactory(
-            self._transformer_service, self._model_field_service
-        ).get_mapper_by_type(remote_field.get_list_item_type())
-        field_mapper.set_remote_model_id(
-            remote_field.object_model_id
-        ).set_remote_field_id(remote_field.id)
+            model_field_service=self.model_field_service, map_service=self.map_service
+        ).get_mapper_by_type(source_field.get_list_item_type())
+        field_mapper.set_source_model_id(
+            source_field.object_model_id
+        ).set_source_field_id(source_field.id).set_map_id(self.map_id)
 
-        for value in remote_value:
+        for value in source_value:
             result.append(field_mapper.map_to_target(value))
 
         return result
@@ -140,7 +145,7 @@ class ListMapper(JSONMapper):
 
         item = next(iter(dto), None)
         field_mapper = JSONMapperFactory(
-            self._transformer_service, self._model_field_service
+            model_field_service=self.model_field_service, map_service=self.map_service
         ).get_mapper_by_value(item)
         result["items"] = field_mapper.map_to_json_type_definition(item)
 
@@ -148,16 +153,12 @@ class ListMapper(JSONMapper):
 
 
 class PrimitiveMapper(JSONMapper):
-    def map_to_target(self, remote_value):
-        return self._transform(remote_value)
-
-    def _transform(self, remote_value):
-        result = remote_value
-        if self.remote_field.is_transformable():
-            result = self._transformer_service.transform(
-                id=self.remote_field.transformer_id, value=remote_value
-            )
-        return result
+    def map_to_target(self, source_value):
+        return self.map_service.transform(
+            source_field=self.source_field,
+            map_id=self.map_id,
+            source_value=source_value,
+        )
 
     def map_to_json_type_definition(self, dto):
         return {"type": self.get_json_type()}
@@ -174,15 +175,19 @@ class StringMapper(PrimitiveMapper):
 class JSONMapperFactory:
     def __init__(
         self,
-        transformer_service: TransformerService,
+        map_service: MapService,
         model_field_service: ModelFieldService = None,
     ):
         self.field_types = FieldTypeChoices
         self._model_field_service = model_field_service
-        self._transformer_service = transformer_service
+        self.map_service = map_service
 
-    def add_service(self, service: ModelFieldService):
-        self._model_field_service = service
+    @property
+    def model_field_service(self):
+        return self._model_field_service
+
+    def set_model_field_service(self, model_field_service: ModelFieldService):
+        self._model_field_service = model_field_service
 
     def _get_type(self, value):
         if type(value) is str:
@@ -198,25 +203,25 @@ class JSONMapperFactory:
 
     def get_mapper_by_type(self, type: FieldTypeChoices):
         if type is self.field_types.OBJECT:
-            return ObjectMapper(self._transformer_service, self._model_field_service)
+            return ObjectMapper(self.model_field_service, self.map_service)
         elif type is self.field_types.LIST:
-            return ListMapper(self._transformer_service, self._model_field_service)
+            return ListMapper(self.model_field_service, self.map_service)
         elif type is self.field_types.NUMBER:
-            return NumberMapper(self._transformer_service, self._model_field_service)
+            return NumberMapper(self.model_field_service, self.map_service)
         elif type is self.field_types.STRING:
-            return StringMapper(self._transformer_service, self._model_field_service)
+            return StringMapper(self.model_field_service, self.map_service)
         else:
             raise InvalidType(msg=f"Unprocessable field type: {type}")
 
     def get_mapper_by_value(self, value: Any):
         type = self._get_type(value)
         if type is self.field_types.OBJECT:
-            return ObjectMapper(self._transformer_service, self._model_field_service)
+            return ObjectMapper(self.model_field_service, self.map_service)
         elif type is self.field_types.LIST:
-            return ListMapper(self._transformer_service, self._model_field_service)
+            return ListMapper(self.model_field_service, self.map_service)
         elif type is self.field_types.NUMBER:
-            return NumberMapper(self._transformer_service, self._model_field_service)
+            return NumberMapper(self.model_field_service, self.map_service)
         elif type is self.field_types.STRING:
-            return StringMapper(self._transformer_service, self._model_field_service)
+            return StringMapper(self.model_field_service, self.map_service)
         else:
             raise InvalidType(msg=f"Unprocessable value of type: {type}")

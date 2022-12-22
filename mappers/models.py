@@ -113,9 +113,6 @@ class Field(TimestampedModel):
     def get_list_item_type(self) -> FieldTypeChoices:
         return FieldTypeChoices[self.list_item_type]
 
-    def is_transformable(self) -> bool:
-        return self.transformer_id is not None
-
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(id: {self.id}, name: {self.name})"
 

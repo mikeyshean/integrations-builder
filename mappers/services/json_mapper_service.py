@@ -9,37 +9,40 @@ from mappers.services.model_field_service import ModelFieldService
 class JSONMapperService:
     def __init__(
         self,
-        field_mapper_factory: JSONMapperFactory,
+        json_mapper_factory: JSONMapperFactory,
         model_field_service: ModelFieldService,
     ):
-        self.field_mapper_factory = field_mapper_factory
-        self.field_mapper_factory.add_service(model_field_service)
+        self.json_mapper_factory = json_mapper_factory
+        self.json_mapper_factory.set_model_field_service(model_field_service)
         self.model_field_service = model_field_service
 
-    def map_to_target_dto(self, remote_dto: dict, remote_model_id: str) -> dict:
+    def map_to_target_dto(
+        self, source_dto: dict, source_model_id: int, map_id: int
+    ) -> dict:
         """Maps a known remote dto to it's target dto representation
 
         Args:
-            remote_dto (dict): Remote dto payload
-            remote_model_id (str): Known model_id for this dto
+            source_dto (dict): Source dto payload
+            source_model_id (str): Known model_id for this dto
 
         Returns:
             dict: Target dto representation
         """
-        field_mapper = self.field_mapper_factory.get_mapper_by_value(remote_dto)
-        field_mapper.set_remote_model_id(remote_model_id)
-        return field_mapper.map_to_target(remote_value=remote_dto)
+        field_mapper = self.json_mapper_factory.get_mapper_by_value(source_dto)
+        field_mapper.set_map_id(map_id)
+        field_mapper.set_source_model_id(source_model_id)
+        return field_mapper.map_to_target(source_value=source_dto)
 
     def map_to_json_types(self, json_dto: dict) -> dict:
         """Maps an example model to its type structure, similar to JSON Schema
 
         Args:
-            remote_dto (dict): example model data
+            json_dto (dict): example model data
 
         Returns:
             dict: Dictionary with field names and type data
         """
-        field_mapper = self.field_mapper_factory.get_mapper_by_value(json_dto)
+        field_mapper = self.json_mapper_factory.get_mapper_by_value(json_dto)
         return field_mapper.map_to_json_type_definition(dto=json_dto)
 
     @transaction.atomic

@@ -3,6 +3,7 @@ import json
 from mappers.field_transformers import FieldTransformerFactory
 from mappers.json_mappers import JSONMapperFactory
 from mappers.services.json_mapper_service import JSONMapperService
+from mappers.services.map_service import MapService
 from mappers.services.model_field_service import ModelFieldService
 from mappers.services.transformer_service import TransformerService
 
@@ -13,14 +14,17 @@ class MapperEventHandlers:
         transformer_service = TransformerService(
             transformer_factory=FieldTransformerFactory()
         )
-        field_mapper_factory = JSONMapperFactory(
-            transformer_service=transformer_service
+        json_mapper_factory = JSONMapperFactory(
+            map_service=MapService(transformer_service=transformer_service)
         )
         json_mapper_service = JSONMapperService(
-            field_mapper_factory, ModelFieldService()
+            json_mapper_factory=json_mapper_factory,
+            model_field_service=ModelFieldService(),
         )
         dto = json_mapper_service.map_to_target_dto(
-            remote_dto=event["data"], remote_model_id=event["remote_model_id"]
+            source_dto=event["data"],
+            source_model_id=event["source_model_id"],
+            map_id=event["map_id"],
         )
 
         print(f"Pushed MappedEvent to SQS:\n{json.dumps(dto, indent=4)}")

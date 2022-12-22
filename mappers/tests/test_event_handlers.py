@@ -21,17 +21,17 @@ class TestMapperEventHandlers(TestCase):
             transformer_factory=FieldTransformerFactory
         )
         self.json_mapper_service = JSONMapperService(
-            field_mapper_factory=JSONMapperFactory(
+            json_mapper_factory=JSONMapperFactory(
                 transformer_service=transformer_service
             ),
             model_field_service=ModelFieldService(),
         )
         self._create_target_model()
-        self._create_remote_model()
-        self.upppercase_transformer = Transformer.objects.create(
+        self._create_source_model()
+        self.uppercase_transformer = Transformer.objects.create(
             type=TransformerTypeChoices.UPPERCASE
         )
-        self._create_remote_to_target_mappings(self.remote_model, self.target_model)
+        self._create_remote_to_target_mappings(self.source_model, self.target_model)
         self.event = {
             "data": {
                 "id": 123456,
@@ -47,7 +47,7 @@ class TestMapperEventHandlers(TestCase):
                 "address": {"id": "a1", "street": "123 Road"},
             },
             "sync_id": "sync-id",
-            "remote_model_id": self.remote_model.id,
+            "source_model_id": self.source_model.id,
         }
 
     def _create_target_model(self):
@@ -72,7 +72,7 @@ class TestMapperEventHandlers(TestCase):
             )
         )
 
-    def _create_remote_model(self):
+    def _create_source_model(self):
         data = {
             "id": 123456,
             "first_name": "Mike",
@@ -87,9 +87,9 @@ class TestMapperEventHandlers(TestCase):
             "address": {"id": "a1", "street": "123 Road"},
         }
         type_map = self.json_mapper_service.map_to_json_types(json_dto=data)
-        self.remote_model = (
+        self.source_model = (
             self.json_mapper_service.create_models_and_fields_from_type_map(
-                type_map, is_remote=True
+                type_map=type_map
             )
         )
 
@@ -103,7 +103,7 @@ class TestMapperEventHandlers(TestCase):
             target_field = target_model.fields.get(name=target_field_name)
             remote_field.target_field_id = target_field.id
             if remote_field.name == "first_name":
-                remote_field.transformer = self.upppercase_transformer
+                remote_field.transformer = self.uppercase_transformer
             remote_field.save()
             if remote_field.object_model_id:
                 self._create_remote_to_target_mappings(
