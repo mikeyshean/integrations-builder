@@ -44,33 +44,34 @@ class JSONMapperService:
 
     @transaction.atomic
     def create_models_and_fields_from_type_map(
-        self, type_map: dict, is_remote: bool, model_name: str = "Root"
+        self, type_map: dict, model_name: str = "Root"
     ) -> Model:
         """Creates models and fields from a type_map dictionary
 
         Args:
             type_map (dict): Dictionary with field names and type data
-            is_remote (bool): Saves as Remote model when set to True by \
-                setting is_remote flag, otherwise Target model
             model_name (str, optional): Can be overriden to save a \
                 custom model name. Defaults to "Root".
 
         Returns:
             Model: Instance of a Model
         """
-        model = self.model_field_service.create_model(
-            name=model_name, is_remote=is_remote
-        )
+        model = self.model_field_service.create_model(name=model_name)
         for field_name, field_type_map in type_map["properties"].items():
             field = self._create_field_from_type_map(
-                model.id, field_name, field_type_map, is_remote
+                model.id,
+                field_name,
+                field_type_map,
             )
             field.model = model
             field.save()
         return model
 
     def _create_field_from_type_map(
-        self, model_id, field_name, type_map, is_remote
+        self,
+        model_id,
+        field_name,
+        type_map,
     ) -> Field:
         type = self._get_field_type_from_json_type(JSONType(type_map["type"]))
         field = self.model_field_service.create_field(
@@ -78,26 +79,44 @@ class JSONMapperService:
         )
 
         if type is FieldTypeChoices.LIST:
-            field = self._update_array_field(field_name, type_map, field.id, is_remote)
+            field = self._update_array_field(
+                field_name,
+                type_map,
+                field.id,
+            )
         elif type is FieldTypeChoices.OBJECT:
-            field = self._update_object_field(field_name, type_map, field.id, is_remote)
+            field = self._update_object_field(
+                field_name,
+                type_map,
+                field.id,
+            )
 
         return field
 
-    def _update_object_field(self, model_name, type_map, field_id, is_remote) -> Field:
+    def _update_object_field(
+        self,
+        model_name,
+        type_map,
+        field_id,
+    ) -> Field:
         object_model = self.create_models_and_fields_from_type_map(
-            model_name=model_name, is_remote=is_remote, type_map=type_map
+            model_name=model_name, type_map=type_map
         )
         return self.model_field_service.update_field(
-            field_id=field_id, object_model_id=object_model.id, is_remote=is_remote
+            field_id=field_id, object_model_id=object_model.id
         )
 
-    def _update_array_field(self, field_name, type_map, field_id, is_remote) -> Field:
+    def _update_array_field(
+        self,
+        field_name,
+        type_map,
+        field_id,
+    ) -> Field:
         item_type = self._get_field_type_from_json_type(
             JSONType(type_map["items"]["type"])
         )
         field = self.model_field_service.update_field(
-            field_id=field_id, list_item_type=item_type, is_remote=is_remote
+            field_id=field_id, list_item_type=item_type
         )
 
         if item_type is FieldTypeChoices.OBJECT:
@@ -106,7 +125,6 @@ class JSONMapperService:
                 model_name=object_model_name,
                 type_map=type_map["items"],
                 field_id=field.id,
-                is_remote=is_remote,
             )
         return field
 
