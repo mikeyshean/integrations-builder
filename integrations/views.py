@@ -38,3 +38,9 @@ class IntegrationsViewSet(ViewSet):
 
         serializer = IntegrationSerializer(integration)
         return Response(serializer.data)
+
+    def list(self, request):
+        integrations = IntegrationsApi.list_integrations()
+
+        serializer = IntegrationSerializer(integrations, many=True)
+        return Response(serializer.data)

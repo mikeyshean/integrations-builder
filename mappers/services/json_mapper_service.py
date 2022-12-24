@@ -1,8 +1,8 @@
 from django.db import transaction
 
 from mappers.constants import JSON_TYPE_TO_FIELD_TYPE, JSONType
-from mappers.json_mappers import JSONMapperFactory
 from mappers.models import Field, FieldTypeChoices, Model
+from mappers.services.json_mapper_factory import JSONMapperFactory
 from mappers.services.model_field_service import ModelFieldService
 
 

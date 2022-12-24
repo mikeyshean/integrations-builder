@@ -1,14 +1,14 @@
 version: '3.8'
 services:
-  db:
+  postgres:
     image: postgres
     platform: linux/amd64
     volumes:
       - ./data/db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${DATABASE_NAME}
-      - POSTGRES_USER=${DATABASE_USER}
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     container_name: postgres_db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -17,6 +17,8 @@ services:
       retries: 5
     ports:
       - '5432:5432'
+    networks:
+      - backend_network
   app:
     build: .
     platform: linux/amd64
@@ -28,5 +30,10 @@ services:
     container_name: django_container
     command: python manage.py runserver 0.0.0.0:8000
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
+    networks:
+      - backend_network
+networks:
+  backend_network:
+    name: backend_network

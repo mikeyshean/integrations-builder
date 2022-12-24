@@ -24,7 +24,12 @@ django==4.1.4
     # via
     #   -c requirements.txt
     #   -r requirements.txt
+    #   django-cors-headers
     #   djangorestframework
+django-cors-headers==3.13.0
+    # via
+    #   -c requirements.txt
+    #   -r requirements.txt
 django-environ==0.9.0
     # via
     #   -c requirements.txt

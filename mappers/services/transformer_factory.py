@@ -20,7 +20,7 @@ class StringToFloatTransformer(FieldTransformer):
         return float(value)
 
 
-class FieldTransformerFactory:
+class TransformerFactory:
 
     TRANSFORMER_MAP = {
         TransformerTypeChoices.UPPERCASE: UppercaseTransformer(),
