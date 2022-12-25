@@ -6,6 +6,7 @@ sqlparse==0.4.3
 psycopg2-binary==2.9.4
 djangorestframework==3.14.0
 django-cors-headers==3.13.0
+djangorestframework-simplejwt==5.2.2
 
 factory-boy==3.2.0
 faker==1.0.7

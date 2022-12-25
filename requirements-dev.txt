@@ -26,6 +26,7 @@ django==4.1.4
     #   -r requirements.txt
     #   django-cors-headers
     #   djangorestframework
+    #   djangorestframework-simplejwt
 django-cors-headers==3.13.0
     # via
     #   -c requirements.txt
@@ -35,6 +36,11 @@ django-environ==0.9.0
     #   -c requirements.txt
     #   -r requirements.txt
 djangorestframework==3.14.0
+    # via
+    #   -c requirements.txt
+    #   -r requirements.txt
+    #   djangorestframework-simplejwt
+djangorestframework-simplejwt==5.2.2
     # via
     #   -c requirements.txt
     #   -r requirements.txt
@@ -69,6 +75,11 @@ psycopg2-binary==2.9.4
     # via
     #   -c requirements.txt
     #   -r requirements.txt
+pyjwt==2.6.0
+    # via
+    #   -c requirements.txt
+    #   -r requirements.txt
+    #   djangorestframework-simplejwt
 pytest==7.2.0
     # via
     #   -r requirements-dev.in
