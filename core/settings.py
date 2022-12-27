@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -27,12 +28,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
+is_local = os.getenv("ENV") == "local"
+get_env = env.get_value if is_local else os.getenv
+
+SECRET_KEY = get_env("DJANGO_SECRET")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -92,11 +96,11 @@ WSGI_APPLICATION = "core.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("POSTGRES_DB"),
-        "USER": env("POSTGRES_USER"),
-        "PASSWORD": env("POSTGRES_PASSWORD"),
-        "HOST": env("POSTGRES_HOST"),
-        "PORT": env("POSTGRES_PORT"),
+        "NAME": get_env("POSTGRES_DB"),
+        "USER": get_env("POSTGRES_USER"),
+        "PASSWORD": get_env("POSTGRES_PASSWORD"),
+        "HOST": get_env("POSTGRES_HOST"),
+        "PORT": get_env("POSTGRES_PORT"),
     }
 }
 
@@ -170,6 +174,7 @@ SIMPLE_JWT = {
     "AUDIENCE": None,
     "ISSUER": None,
     "JWK_URL": None,
+    "SIGNING_KEY": get_env("JWT_SIGNING_KEY"),
     "LEEWAY": 0,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
