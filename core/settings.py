@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://apimapper.dev",
+    "https://api.apimapper.dev",
     "https://www.apimapper.dev",
 ]
 
