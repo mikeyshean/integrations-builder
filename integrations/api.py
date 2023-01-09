@@ -13,3 +13,7 @@ class IntegrationsApi:
     @staticmethod
     def list_integrations():
         return IntegrationService.list_integrations()
+
+    @staticmethod
+    def list_categories():
+        return IntegrationService.list_categories()

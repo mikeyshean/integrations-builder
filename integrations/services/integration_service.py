@@ -19,3 +19,7 @@ class IntegrationService:
     @staticmethod
     def list_integrations() -> List[Integration]:
         return Integration.objects.all()
+
+    @staticmethod
+    def list_categories() -> List[Category]:
+        return Category.objects.all()

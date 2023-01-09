@@ -7,7 +7,7 @@ from rest_framework.viewsets import ViewSet
 
 from core.exceptions import UnprocessableError
 from integrations.api import IntegrationsApi
-from integrations.serializers import IntegrationSerializer
+from integrations.serializers import CategorySerializer, IntegrationSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -43,4 +43,15 @@ class IntegrationsViewSet(ViewSet):
         integrations = IntegrationsApi.list_integrations()
 
         serializer = IntegrationSerializer(integrations, many=True)
+        return Response(serializer.data)
+
+
+class IntegrationCategoriesViewSet(ViewSet):
+
+    permission_classes = (IsAuthenticated,)
+
+    def list(self, request):
+        categories = IntegrationsApi.list_categories()
+
+        serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
