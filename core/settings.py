@@ -159,7 +159,8 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://mikeyshean.dev",
+    "https://apimapper.dev",
+    "https://www.apimapper.dev",
 ]
 
 # JWT
