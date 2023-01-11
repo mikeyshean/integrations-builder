@@ -7,7 +7,11 @@ from rest_framework.viewsets import ViewSet
 
 from core.exceptions import UnprocessableError
 from integrations.api import IntegrationsApi
-from integrations.serializers import CategorySerializer, IntegrationSerializer
+from integrations.serializers import (
+    CategorySerializer,
+    CreateIntegrationSerializer,
+    IntegrationSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +22,13 @@ class IntegrationsViewSet(ViewSet):
 
     def create(self, request):
         try:
-            serializer = IntegrationSerializer(data=request.data)
+            serializer = CreateIntegrationSerializer(data=request.data)
             if not serializer.is_valid():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
             data = serializer.validated_data
             integration = IntegrationsApi.create_integration(
-                name=data["name"], category_id=data["category"]["id"]
+                name=data["name"], category_id=data["category_id"]
             )
             response_serializer = IntegrationSerializer(integration)
             return Response(response_serializer.data)

@@ -15,3 +15,11 @@ class IntegrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Integration
         fields = ("id", "name", "category")
+
+
+class CreateIntegrationSerializer(serializers.ModelSerializer):
+    category_id = serializers.IntegerField()
+
+    class Meta:
+        model = Integration
+        fields = ("name", "category_id")
