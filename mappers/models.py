@@ -11,7 +11,7 @@ class Model(TimestampedModel):
         return f"{self.__class__.__name__}(id: {self.id}, name: {self.name})"
 
 
-class Map(TimestampedModel):
+class Mapper(TimestampedModel):
     source_model = models.ForeignKey(
         "Model", on_delete=models.CASCADE, related_name="+", null=False
     )
@@ -124,15 +124,15 @@ class ModelMap(TimestampedModel):
     target_model = models.ForeignKey(
         "Model", on_delete=models.CASCADE, related_name="+", null=False
     )
-    map = models.ForeignKey(
-        "Map", on_delete=models.CASCADE, related_name="+", null=False
+    mapper = models.ForeignKey(
+        "Mapper", on_delete=models.CASCADE, related_name="+", null=False
     )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["source_model", "map", "target_model"],
-                name="%(app_label)s_%(class)s_unique_source_map_target",
+                fields=["source_model", "mapper", "target_model"],
+                name="%(app_label)s_%(class)s_unique_source_mapper_target",
             )
         ]
 
@@ -144,8 +144,8 @@ class FieldMap(TimestampedModel):
     target_field = models.ForeignKey(
         "Field", on_delete=models.CASCADE, related_name="+", null=False
     )
-    map = models.ForeignKey(
-        "Map", on_delete=models.CASCADE, related_name="+", null=False
+    mapper = models.ForeignKey(
+        "Mapper", on_delete=models.CASCADE, related_name="+", null=False
     )
     transformer = models.ForeignKey(
         "Transformer", on_delete=models.CASCADE, related_name="+", null=True, blank=True
@@ -154,7 +154,7 @@ class FieldMap(TimestampedModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["source_field", "map", "target_field"],
-                name="%(app_label)s_%(class)s_unique_source_map_target",
+                fields=["source_field", "mapper", "target_field"],
+                name="%(app_label)s_%(class)s_unique_source_mapper_target",
             )
         ]

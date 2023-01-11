@@ -1,7 +1,7 @@
 from typing import Any
 
 from mappers.exceptions import NotFoundError
-from mappers.models import Field, FieldMap, Map, Model, ModelMap, Transformer
+from mappers.models import Field, FieldMap, Mapper, Model, ModelMap, Transformer
 from mappers.services.transformer_service import TransformerService
 
 
@@ -11,14 +11,37 @@ class MapService:
 
     @staticmethod
     def create_map(source_model: Model, target_model: Model):
-        return Map.objects.create(source_model=source_model, target_model=target_model)
+        """
+        Creates root Map instance with associated source and target Models
+
+        Args:
+            source_model (Model): Model we are are mapping from
+            target_model (Model): Model we are mapping to
+
+        Returns:
+            (Map): Instance of the Map object
+        """
+        return Mapper.objects.create(
+            source_model=source_model, target_model=target_model
+        )
 
     @staticmethod
     def get_map_by_id(id: int):
-        return Map.objects.filter(id=id).first()
+        return Mapper.objects.filter(id=id).first()
 
     @staticmethod
-    def create_model_map(source_model: Model, target_model: Model, map: Map):
+    def create_model_map(source_model: Model, target_model: Model, map: Mapper):
+        """
+        Create sub-mappings for nested models.
+
+        Args:
+            source_model (Model): Nested model we are mapping from
+            target_model (Model): Model we are mapping to
+            map (Map): The root Map for this nested source_model
+
+        Returns:
+            (ModleMap): Instance of ModelMap
+        """
         return ModelMap.objects.create(
             source_model=source_model, target_model=target_model, map=map
         )
@@ -27,9 +50,22 @@ class MapService:
     def create_field_map(
         source_field: Field,
         target_field: Field,
-        map: Map,
+        map: Mapper,
         transformer: Transformer = None,
     ):
+        """
+        Create field to field mappings via FieldMap instance
+
+        Args:
+            source_field (Field): Field we are mapping from
+            target_field (Field): Field we are mapping to
+            map (Map): The root Map for this nested source_model
+            transformer (Transformer): Transformer to be applied during mapping
+
+        Returns:
+            (FieldMap): Instance of FieldMap
+        """
+
         return FieldMap.objects.create(
             source_field=source_field,
             target_field=target_field,

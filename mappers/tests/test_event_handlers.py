@@ -2,7 +2,7 @@ import pytest
 from django.test import TestCase
 
 from mappers.events.event_handlers import MapperEventHandlers
-from mappers.models import Map, Model, Transformer, TransformerTypeChoices
+from mappers.models import Mapper, Model, Transformer, TransformerTypeChoices
 from mappers.services.json_mapper_factory import JSONMapperFactory
 from mappers.services.json_mapper_service import JSONMapperService
 from mappers.services.map_service import MapService
@@ -153,7 +153,7 @@ class TestMapperEventHandlers(TestCase):
         )
 
     def _create_source_to_target_mappings(
-        self, source_model: Model, target_model: Model, map: Map
+        self, source_model: Model, target_model: Model, map: Mapper
     ):
         self.map_service.create_model_map(
             source_model=source_model, target_model=target_model, map=map

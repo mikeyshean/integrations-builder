@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from mappers.models import Field, FieldMap, Map, Model, ModelMap, Transformer
+from mappers.models import Field, FieldMap, Mapper, Model, ModelMap, Transformer
 
 
 class FieldInline(admin.TabularInline):
@@ -70,7 +70,7 @@ class TransformerAdmin(admin.ModelAdmin):
     exclude = ("created", "modified")
 
 
-@admin.register(Map)
+@admin.register(Mapper)
 class MapAdmin(admin.ModelAdmin):
 
     list_display = ("id", "source_model", "target_model")
@@ -81,14 +81,14 @@ class MapAdmin(admin.ModelAdmin):
 @admin.register(ModelMap)
 class TargetModelAdmin(admin.ModelAdmin):
 
-    list_display = ("id", "map", "source_model", "target_model")
-    list_display_links = ("id", "map")
+    list_display = ("id", "mapper", "source_model", "target_model")
+    list_display_links = ("id", "mapper")
     exclude = ("created", "modified")
 
 
 @admin.register(FieldMap)
 class TargetFieldAdmin(admin.ModelAdmin):
 
-    list_display = ("id", "map", "source_field", "target_field", "transformer")
-    list_display_links = ("id", "map")
+    list_display = ("id", "mapper", "source_field", "target_field", "transformer")
+    list_display_links = ("id", "mapper")
     exclude = ("created", "modified")
