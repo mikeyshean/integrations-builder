@@ -21,6 +21,11 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 @api_view(["GET"])
 def get_routes(request):
-    routes = ["/api/token", "/api/token/refresh", "/api/integrations"]
+    routes = [
+        "/api/token",
+        "/api/token/refresh",
+        "/api/integrations",
+        "/api/mappers/json",
+    ]
 
     return Response(routes)

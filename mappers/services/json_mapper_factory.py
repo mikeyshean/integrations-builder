@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Any, TypeVar
 
@@ -8,6 +9,8 @@ from mappers.services.map_service import MapService
 from mappers.services.model_field_service import ModelFieldService
 
 T = TypeVar("T", bound="JSONMapper")
+
+logger = logging.getLogger(__name__)
 
 
 class JSONMapper(ABC):
@@ -172,6 +175,10 @@ class StringMapper(PrimitiveMapper):
     type = FieldTypeChoices.STRING
 
 
+class BooleanMapper(PrimitiveMapper):
+    type = FieldTypeChoices.BOOLEAN
+
+
 class JSONMapperFactory:
     def __init__(
         self,
@@ -198,6 +205,8 @@ class JSONMapperFactory:
             return self.field_types.LIST
         elif type(value) is dict:
             return self.field_types.OBJECT
+        elif type(value) is bool:
+            return self.field_types.BOOLEAN
         else:
             return self.field_types.UNKNOWN
 
@@ -210,6 +219,8 @@ class JSONMapperFactory:
             return NumberMapper(self.model_field_service, self.map_service)
         elif type is self.field_types.STRING:
             return StringMapper(self.model_field_service, self.map_service)
+        elif type is self.field_types.BOOLEAN:
+            return BooleanMapper(self.model_field_service, self.map_service)
         else:
             raise InvalidType(msg=f"Unprocessable field type: {type}")
 
@@ -223,5 +234,9 @@ class JSONMapperFactory:
             return NumberMapper(self.model_field_service, self.map_service)
         elif type is self.field_types.STRING:
             return StringMapper(self.model_field_service, self.map_service)
+        elif type is self.field_types.BOOLEAN:
+            return BooleanMapper(self.model_field_service, self.map_service)
         else:
-            raise InvalidType(msg=f"Unprocessable value of type: {type}")
+            raise InvalidType(
+                msg=f"Unprocessable value of type: {type}, value: {value}"
+            )
