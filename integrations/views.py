@@ -29,7 +29,9 @@ class IntegrationsViewSet(ViewSet):
 
             data = serializer.validated_data
             integration = IntegrationsApi.create_integration(
-                name=data["name"], category_id=data["category_id"]
+                name=data["name"],
+                category_id=data["category_id"],
+                domain=data["domain"],
             )
             response_serializer = BasicIntegrationSerializer(integration)
             return Response(response_serializer.data)

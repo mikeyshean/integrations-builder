@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from integrations.models import Category, Endpoint, Integration
+from integrations.models import Category, Domain, Endpoint, Integration
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -23,18 +23,26 @@ class BasicIntegrationSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "category")
 
 
+class DomainSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Domain
+        fields = ("id", "domain")
+
+
 class ListIntegrationSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
     endpoint_count = serializers.ReadOnlyField(source="endpoints.count")
+    domains = DomainSerializer(many=True)
 
     class Meta:
         model = Integration
-        fields = ("id", "name", "category", "endpoint_count")
+        fields = ("id", "name", "category", "endpoint_count", "domains")
 
 
-class CreateIntegrationSerializer(serializers.ModelSerializer):
+class CreateIntegrationSerializer(serializers.Serializer):
     category_id = serializers.IntegerField()
+    domain = serializers.CharField()
+    name = serializers.CharField()
 
     class Meta:
-        model = Integration
-        fields = ("name", "category_id")
+        fields = ("name", "category_id", "domain")
