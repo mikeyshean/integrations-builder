@@ -6,6 +6,13 @@ from core.models import TimestampedModel
 
 class Model(TimestampedModel):
     name = models.CharField(max_length=64, help_text="Name of the model")
+    category = models.ForeignKey(
+        "integrations.Category",
+        on_delete=models.CASCADE,
+        related_name="models",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(id: {self.id}, name: {self.name})"
