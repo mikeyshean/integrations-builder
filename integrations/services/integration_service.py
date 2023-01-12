@@ -1,7 +1,10 @@
+import logging
 from typing import List
 
-from core.exceptions import UnprocessableError
+from core.exceptions import NotFoundError, UnprocessableError
 from integrations.models import Category, Integration
+
+logger = logging.getLogger(__name__)
 
 
 class IntegrationService:
@@ -23,3 +26,10 @@ class IntegrationService:
     @staticmethod
     def list_categories() -> List[Category]:
         return Category.objects.all()
+
+    @staticmethod
+    def delete_integration(id: int) -> bool:
+        try:
+            Integration.objects.get(id=id).delete()
+        except Integration.DoesNotExist:
+            raise NotFoundError()

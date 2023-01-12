@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from core.exceptions import UnprocessableError
+from core.exceptions import NotFoundError, UnprocessableError
 from integrations.api import IntegrationsApi
 from integrations.serializers import (
     BasicIntegrationSerializer,
@@ -49,6 +49,13 @@ class IntegrationsViewSet(ViewSet):
 
         serializer = ListIntegrationSerializer(integrations, many=True)
         return Response(serializer.data)
+
+    def delete(self, request, pk: int):
+        try:
+            IntegrationsApi.delete_integration_by_id(pk)
+            return Response(status=status.HTTP_200_OK)
+        except NotFoundError:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class IntegrationCategoriesViewSet(ViewSet):

@@ -15,5 +15,9 @@ class IntegrationsApi:
         return IntegrationService.list_integrations()
 
     @staticmethod
+    def delete_integration_by_id(id: int):
+        return IntegrationService.delete_integration(id)
+
+    @staticmethod
     def list_categories():
         return IntegrationService.list_categories()
