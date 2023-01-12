@@ -1,3 +1,4 @@
+from integrations.services.endpoint_service import EndpointService
 from integrations.services.integration_service import IntegrationService
 
 
@@ -23,3 +24,21 @@ class IntegrationsApi:
     @staticmethod
     def list_categories():
         return IntegrationService.list_categories()
+
+    @staticmethod
+    def list_endpoints():
+        return EndpointService.list_endpoints()
+
+    @staticmethod
+    def get_endpoint_by_id(id: int):
+        return EndpointService.get_by_id(id=id)
+
+    @staticmethod
+    def create_endpoint(method: str, path: str, integration_id: int):
+        return EndpointService.create(
+            method=method, path=path, integration_id=integration_id
+        )
+
+    @staticmethod
+    def delete_endpoint_by_id(id: int):
+        return EndpointService.delete_endpoint(id)

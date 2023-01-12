@@ -1,9 +1,17 @@
 from rest_framework.routers import SimpleRouter
 
-from integrations.views import IntegrationCategoriesViewSet, IntegrationsViewSet
+from integrations.views import (
+    EndpointViewSet,
+    IntegrationCategoriesViewSet,
+    IntegrationsViewSet,
+)
 
 router = SimpleRouter(trailing_slash=False)
 router.register(
-    "integration-categories/", IntegrationCategoriesViewSet, basename="categories"
+    r"integration/categories/", IntegrationCategoriesViewSet, basename="categories"
 )
-router.register("integrations", IntegrationsViewSet, basename="integrations")
+router.register(r"integrations", IntegrationsViewSet, basename="integrations")
+
+
+endpoint_router = SimpleRouter(trailing_slash=False)
+endpoint_router.register(r"endpoints", EndpointViewSet, basename="endpoints")

@@ -9,12 +9,6 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
-class EndpointSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Endpoint
-        fields = ("id", "name")
-
-
 class BasicIntegrationSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
 
@@ -46,3 +40,28 @@ class CreateIntegrationSerializer(serializers.Serializer):
 
     class Meta:
         fields = ("name", "category_id", "domain")
+
+
+class CreateEndpointSerializer(serializers.Serializer):
+    method = serializers.CharField()
+    path = serializers.CharField()
+
+    class Meta:
+        fields = ("method", "path")
+
+
+class ModelSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+
+    class Meta:
+        fields = ("id", "name")
+
+
+class EndpointSerializer(serializers.ModelSerializer):
+    integration = BasicIntegrationSerializer()
+    model = ModelSerializer()
+
+    class Meta:
+        model = Endpoint
+        fields = ("id", "method", "path", "integration", "model")
