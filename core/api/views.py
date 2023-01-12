@@ -26,6 +26,7 @@ def get_routes(request):
         "/api/token/refresh",
         "/api/integrations",
         "/api/mappers/json",
+        "/api/models",
     ]
 
     return Response(routes)

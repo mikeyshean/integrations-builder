@@ -9,6 +9,7 @@ from rest_framework.viewsets import ViewSet
 
 from core.exceptions import UnprocessableError
 from mappers.api.json_mapper_api import JsonMapperApi
+from mappers.api.models_api import ModelsApi
 from mappers.serializers import CreateModelFromPayload, ModelSerializer
 
 logger = logging.getLogger(__name__)
@@ -43,3 +44,13 @@ class JsonMapperViewSet(ViewSet):
             for k, v in e.detail.items():
                 errors[k] = map(lambda detail: detail.title(), v)
             return Response(errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
+class ModelViewSet(ViewSet):
+
+    permission_classes = (IsAuthenticated,)
+
+    def list(self, request):
+        models = ModelsApi.list()
+        serializer = ModelSerializer(models, many=True)
+        return Response(serializer.data)
