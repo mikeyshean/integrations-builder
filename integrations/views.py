@@ -8,9 +8,10 @@ from rest_framework.viewsets import ViewSet
 from core.exceptions import UnprocessableError
 from integrations.api import IntegrationsApi
 from integrations.serializers import (
+    BasicIntegrationSerializer,
     CategorySerializer,
     CreateIntegrationSerializer,
-    IntegrationSerializer,
+    ListIntegrationSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class IntegrationsViewSet(ViewSet):
             integration = IntegrationsApi.create_integration(
                 name=data["name"], category_id=data["category_id"]
             )
-            response_serializer = IntegrationSerializer(integration)
+            response_serializer = BasicIntegrationSerializer(integration)
             return Response(response_serializer.data)
         except UnprocessableError as e:
             return Response(e.message, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -40,13 +41,13 @@ class IntegrationsViewSet(ViewSet):
         if not integration:
             return Response("Integration not found", status=status.HTTP_404_NOT_FOUND)
 
-        serializer = IntegrationSerializer(integration)
+        serializer = BasicIntegrationSerializer(integration)
         return Response(serializer.data)
 
     def list(self, request):
         integrations = IntegrationsApi.list_integrations()
 
-        serializer = IntegrationSerializer(integrations, many=True)
+        serializer = ListIntegrationSerializer(integrations, many=True)
         return Response(serializer.data)
 
 

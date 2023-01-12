@@ -18,7 +18,7 @@ class IntegrationService:
 
     @staticmethod
     def list_integrations() -> List[Integration]:
-        return Integration.objects.all()
+        return Integration.objects.all().prefetch_related("endpoints")
 
     @staticmethod
     def list_categories() -> List[Category]:
