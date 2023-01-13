@@ -62,7 +62,7 @@ class IntegrationsViewSet(ViewSet):
         except NotFoundError:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    @action(detail=True, methods=["POST"])
+    @action(detail=True, methods=["post"], url_path="endpoints")
     def endpoints(self, request, pk=None):
         try:
             serializer = CreateEndpointSerializer(data=request.data)
@@ -79,6 +79,15 @@ class IntegrationsViewSet(ViewSet):
             return Response(response_serializer.data)
         except UnprocessableError as e:
             return Response(e.message, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    @endpoints.mapping.get
+    def get_endpoints(self, request, pk=None):
+        integration = IntegrationsApi.get_integration_by_id(id=pk)
+        if not integration:
+            return Response("Integration not found", status=status.HTTP_404_NOT_FOUND)
+
+        serializer = EndpointSerializer(integration.endpoints, many=True)
+        return Response(serializer.data)
 
 
 class IntegrationCategoriesViewSet(ViewSet):
