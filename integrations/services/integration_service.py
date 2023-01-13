@@ -29,6 +29,7 @@ class IntegrationService:
     def list_integrations() -> List[Integration]:
         return (
             Integration.objects.all()
+            .select_related("category")
             .prefetch_related("endpoints")
             .prefetch_related("domains")
         )

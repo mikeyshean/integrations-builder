@@ -25,7 +25,9 @@ class EndpointService:
     @staticmethod
     def list_endpoints() -> List[Endpoint]:
         return (
-            Endpoint.objects.all().select_related("integration").select_related("model")
+            Endpoint.objects.all()
+            .select_related("integration", "integration__category")
+            .select_related("model")
         )
 
     @staticmethod
@@ -39,3 +41,12 @@ class EndpointService:
     def save_model(endpoint: Endpoint, model_id: int):
         endpoint.model_id = model_id
         endpoint.save()
+
+    @staticmethod
+    def list_models():
+        """
+        Fetch list of Endpoint Models
+        """
+        return Endpoint.objects.select_related(
+            "model", "integration", "integration__category"
+        ).filter(model__isnull=False)

@@ -51,7 +51,7 @@ class CreateEndpointSerializer(serializers.Serializer):
 
 
 class ModelSerializer(serializers.Serializer):
-    id = serializers.CharField()
+    id = serializers.IntegerField()
     name = serializers.CharField()
 
     class Meta:
@@ -61,6 +61,15 @@ class ModelSerializer(serializers.Serializer):
 class EndpointSerializer(serializers.ModelSerializer):
     integration = BasicIntegrationSerializer()
     model = ModelSerializer()
+
+    class Meta:
+        model = Endpoint
+        fields = ("id", "method", "path", "integration", "model")
+
+
+class EndpointModelSerializer(serializers.ModelSerializer):
+    model = ModelSerializer(many=False, read_only=True)
+    integration = BasicIntegrationSerializer(many=False, read_only=True)
 
     class Meta:
         model = Endpoint

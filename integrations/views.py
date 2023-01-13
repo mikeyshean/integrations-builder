@@ -13,6 +13,7 @@ from integrations.serializers import (
     CategorySerializer,
     CreateEndpointSerializer,
     CreateIntegrationSerializer,
+    EndpointModelSerializer,
     EndpointSerializer,
     ListIntegrationSerializer,
 )
@@ -123,4 +124,10 @@ class EndpointViewSet(ViewSet):
             return Response("Endpoint not found", status=status.HTTP_404_NOT_FOUND)
 
         serializer = EndpointSerializer(endpoint)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="models")
+    def list_endpoint_models(self, request):
+        endpoints = IntegrationsApi.list_endpoint_models()
+        serializer = EndpointModelSerializer(endpoints, many=True)
         return Response(serializer.data)

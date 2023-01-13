@@ -51,3 +51,7 @@ class IntegrationsApi:
             raise NotFoundError("Endpoint not found")
 
         EndpointService.save_model(endpoint, model_id)
+
+    @staticmethod
+    def list_endpoint_models():
+        return EndpointService.list_models()
