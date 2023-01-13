@@ -23,7 +23,7 @@ class JsonMapperViewSet(ViewSet):
     @action(
         detail=False,
         methods=["post"],
-        url_path=r"model-from-payload/",
+        url_path="model-from-payload",
         name="Create model from JSON payload",
     )
     def model_from_payload(self, request):
@@ -33,7 +33,9 @@ class JsonMapperViewSet(ViewSet):
             data = serializer.validated_data
 
             model = self.api.create_model_from_json_payload(
-                json_dto=data["json"], model_name=data["model_name"]
+                json_dto=data["json"],
+                model_name=data["model_name"],
+                endpoint_id=data["endpoint_id"],
             )
             response_serializer = ModelSerializer(model)
             return Response(response_serializer.data)

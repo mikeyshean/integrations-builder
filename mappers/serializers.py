@@ -20,7 +20,7 @@ class ModelSerializer(serializers.ModelSerializer):
 class CreateModelFromPayload(serializers.Serializer):
     json = serializers.DictField()
     model_name = serializers.CharField()
-    integration_id = serializers.IntegerField()
+    endpoint_id = serializers.IntegerField()
 
     class Meta:
-        fields = ("json", "model_name", "integration_id")
+        fields = ("json", "model_name", "endpoint_id")

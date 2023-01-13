@@ -1,3 +1,4 @@
+from core.exceptions import NotFoundError
 from integrations.services.endpoint_service import EndpointService
 from integrations.services.integration_service import IntegrationService
 
@@ -42,3 +43,11 @@ class IntegrationsApi:
     @staticmethod
     def delete_endpoint_by_id(id: int):
         return EndpointService.delete_endpoint(id)
+
+    @staticmethod
+    def save_endpoint_model(endpoint_id: int, model_id: int):
+        endpoint = EndpointService.get_by_id(id=endpoint_id)
+        if not endpoint:
+            raise NotFoundError("Endpoint not found")
+
+        EndpointService.save_model(endpoint, model_id)

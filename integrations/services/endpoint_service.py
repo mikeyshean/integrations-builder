@@ -34,3 +34,8 @@ class EndpointService:
             Endpoint.objects.get(id=id).delete()
         except Endpoint.DoesNotExist:
             raise NotFoundError()
+
+    @staticmethod
+    def save_model(endpoint: Endpoint, model_id: int):
+        endpoint.model_id = model_id
+        endpoint.save()

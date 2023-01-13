@@ -1,3 +1,4 @@
+from integrations.api import IntegrationsApi
 from mappers.services.json_mapper_factory import JSONMapperFactory
 from mappers.services.json_mapper_service import JSONMapperService
 from mappers.services.map_service import MapService
@@ -18,9 +19,12 @@ class JsonMapperApi:
             model_field_service=ModelFieldService(),
         )
 
-    def create_model_from_json_payload(self, json_dto: dict, model_name: str):
+    def create_model_from_json_payload(
+        self, json_dto: dict, model_name: str, endpoint_id: int
+    ):
         type_map = self.service.map_to_json_types(json_dto=json_dto)
         model = self.service.create_models_and_fields_from_type_map(
             type_map=type_map, model_name=model_name
         )
+        IntegrationsApi.save_endpoint_model(endpoint_id, model_id=model.id)
         return model
