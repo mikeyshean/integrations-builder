@@ -16,6 +16,7 @@ from integrations.serializers import (
     EndpointModelSerializer,
     EndpointSerializer,
     ListIntegrationSerializer,
+    UpdateEndpointSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -125,6 +126,21 @@ class EndpointViewSet(ViewSet):
 
         serializer = EndpointSerializer(endpoint)
         return Response(serializer.data)
+
+    def partial_update(self, request, pk=None):
+        serializer = UpdateEndpointSerializer(data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+        endpoint = IntegrationsApi.update_endpoint(
+            id=pk,
+            path=data["path"],
+            method=data["method"],
+            integration_id=data["integration_id"],
+        )
+        response_serializer = EndpointSerializer(endpoint)
+        return Response(response_serializer.data)
 
     @action(detail=False, methods=["get"], url_path="models")
     def list_endpoint_models(self, request):

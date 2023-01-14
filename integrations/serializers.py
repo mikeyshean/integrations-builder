@@ -68,9 +68,19 @@ class EndpointSerializer(serializers.ModelSerializer):
 
 
 class EndpointModelSerializer(serializers.ModelSerializer):
+    #  Serializes list of endpoint models
+
     model = ModelSerializer(many=False, read_only=True)
     integration = BasicIntegrationSerializer(many=False, read_only=True)
 
     class Meta:
         model = Endpoint
         fields = ("id", "method", "path", "integration", "model")
+
+
+class UpdateEndpointSerializer(serializers.ModelSerializer):
+    integration_id = serializers.IntegerField()
+
+    class Meta:
+        model = Endpoint
+        fields = ("id", "method", "path", "integration_id")

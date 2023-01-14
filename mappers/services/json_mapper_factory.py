@@ -129,9 +129,11 @@ class ListMapper(JSONMapper):
     def map_to_target(self, source_value):
         result = []
         source_field = self.model_field_service.get_field_by_id(self.source_field_id)
+
         field_mapper = JSONMapperFactory(
             model_field_service=self.model_field_service, map_service=self.map_service
         ).get_mapper_by_type(source_field.get_list_item_type())
+
         field_mapper.set_source_model_id(
             source_field.object_model_id
         ).set_source_field_id(source_field.id).set_map_id(self.map_id)

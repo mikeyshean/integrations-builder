@@ -1,9 +1,20 @@
-from core.exceptions import NotFoundError
 from integrations.services.endpoint_service import EndpointService
 from integrations.services.integration_service import IntegrationService
 
 
 class IntegrationsApi:
+    """
+    This API class is nothing more than a Pass through at the moment.
+
+    TODO: We will handle any service specific exceptions here that we
+    do not want to expose and convert our outputs from all API classes
+    to be DTOs or some other primitive.
+
+    The objective being for Services to handle fetching/mutating
+    objects and APIs to expose service functionality while return
+    a DTO to the caller (View, event handler, etc.)
+    """
+
     @staticmethod
     def create_integration(name: str, category_id: int, domain: str):
         return IntegrationService.create(
@@ -45,13 +56,15 @@ class IntegrationsApi:
         return EndpointService.delete_endpoint(id)
 
     @staticmethod
-    def save_endpoint_model(endpoint_id: int, model_id: int):
-        endpoint = EndpointService.get_by_id(id=endpoint_id)
-        if not endpoint:
-            raise NotFoundError("Endpoint not found")
-
-        EndpointService.save_model(endpoint, model_id)
+    def save_endpoint_model(id: int, model_id: int):
+        EndpointService.update(id=id, model_id=model_id)
 
     @staticmethod
     def list_endpoint_models():
         return EndpointService.list_models()
+
+    @staticmethod
+    def update_endpoint(id: int, path: str, method: str, integration_id: int):
+        EndpointService.update(
+            id=id, method=method, path=path, integration_id=integration_id
+        )

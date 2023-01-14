@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 class EndpointService:
+    UPDATABLE_FIELDS = ["path", "method", "integration_id", "model_id"]
+
     @staticmethod
     def create(method: str, path: str, integration_id: int) -> Endpoint:
         integration = Integration.objects.filter(id=integration_id).first()
@@ -38,9 +40,21 @@ class EndpointService:
             raise NotFoundError()
 
     @staticmethod
-    def save_model(endpoint: Endpoint, model_id: int):
-        endpoint.model_id = model_id
-        endpoint.save()
+    def update(id: int, **kwargs):
+        endpoint = Endpoint.objects.filter(id=id).first()
+
+        if not endpoint:
+            raise NotFoundError("Integration not found")
+
+        update_fields = []
+        for field, value in kwargs.items():
+            if field in EndpointService.UPDATABLE_FIELDS:
+                setattr(endpoint, field, value)
+                update_fields.append(field)
+
+        endpoint.save(update_fields=update_fields)
+
+        return endpoint
 
     @staticmethod
     def list_models():
