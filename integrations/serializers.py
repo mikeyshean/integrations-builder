@@ -33,13 +33,14 @@ class ListIntegrationSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "category", "endpoint_count", "domains")
 
 
-class CreateIntegrationSerializer(serializers.Serializer):
+class MutateIntegrationSerializer(serializers.Serializer):
     category_id = serializers.IntegerField()
+    domain_id = serializers.IntegerField()
     domain = serializers.CharField()
     name = serializers.CharField()
 
     class Meta:
-        fields = ("name", "category_id", "domain")
+        fields = ("name", "category_id", "domain", "domain_id")
 
 
 class CreateEndpointSerializer(serializers.Serializer):

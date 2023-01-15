@@ -30,6 +30,22 @@ class IntegrationsApi:
         return IntegrationService.list_integrations()
 
     @staticmethod
+    def update(
+        id: int,
+        name: str,
+        category_id: int,
+        domain_id: int,
+        domain: str,
+    ):
+        return IntegrationService.update(
+            id=id,
+            name=name,
+            category_id=category_id,
+            domain_id=domain_id,
+            domain=domain,
+        )
+
+    @staticmethod
     def delete_integration_by_id(id: int):
         return IntegrationService.delete_integration(id)
 

@@ -12,10 +12,10 @@ from integrations.serializers import (
     BasicIntegrationSerializer,
     CategorySerializer,
     CreateEndpointSerializer,
-    CreateIntegrationSerializer,
     EndpointModelSerializer,
     EndpointSerializer,
     ListIntegrationSerializer,
+    MutateIntegrationSerializer,
     UpdateEndpointSerializer,
 )
 
@@ -28,7 +28,7 @@ class IntegrationsViewSet(ViewSet):
 
     def create(self, request):
         try:
-            serializer = CreateIntegrationSerializer(data=request.data)
+            serializer = MutateIntegrationSerializer(data=request.data)
             if not serializer.is_valid():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -56,6 +56,22 @@ class IntegrationsViewSet(ViewSet):
 
         serializer = ListIntegrationSerializer(integrations, many=True)
         return Response(serializer.data)
+
+    def partial_update(self, request, pk=None):
+        serializer = MutateIntegrationSerializer(data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+        endpoint = IntegrationsApi.update(
+            id=pk,
+            category_id=data["category_id"],
+            domain_id=data["domain_id"],
+            domain=data["domain"],
+            name=data["name"],
+        )
+        response_serializer = EndpointSerializer(endpoint)
+        return Response(response_serializer.data)
 
     def delete(self, request, pk: int):
         try:

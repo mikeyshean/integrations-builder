@@ -44,7 +44,7 @@ class EndpointService:
         endpoint = Endpoint.objects.filter(id=id).first()
 
         if not endpoint:
-            raise NotFoundError("Integration not found")
+            raise NotFoundError("Endpoint not found")
 
         update_fields = []
         for field, value in kwargs.items():
