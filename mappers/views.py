@@ -56,3 +56,8 @@ class ModelViewSet(ViewSet):
         models = ModelsApi.list()
         serializer = ModelSerializer(models, many=True)
         return Response(serializer.data)
+
+    def retrieve(self, request, pk: int):
+        model = ModelsApi.get_by_id(id=pk)
+        serializer = ModelSerializer(model)
+        return Response(serializer.data)

@@ -13,8 +13,8 @@ class ModelFieldService:
         return obj
 
     @staticmethod
-    def get_model_by_id(model_id: int) -> Field:
-        return Model.objects.filter(id=model_id).first()
+    def get_model_by_id(id: int) -> Field:
+        return Model.objects.filter(id=id).first()
 
     @staticmethod
     def list_models() -> List[Model]:

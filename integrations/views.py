@@ -141,7 +141,7 @@ class EndpointViewSet(ViewSet):
         except NotFoundError:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def retrieve(self, request, pk):
+    def retrieve(self, request, pk: int):
         endpoint = IntegrationsApi.get_endpoint_by_id(id=pk)
         if not endpoint:
             return Response("Endpoint not found", status=status.HTTP_404_NOT_FOUND)
@@ -168,4 +168,11 @@ class EndpointViewSet(ViewSet):
     def list_endpoint_models(self, request):
         endpoints = IntegrationsApi.list_endpoint_models()
         serializer = EndpointModelSerializer(endpoints, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="models")
+    def get_models(self, request, pk: int):
+        endpoint_models = IntegrationsApi.get_endpoint_models(id=pk)
+
+        serializer = EndpointModelSerializer(endpoint_models, many=True)
         return Response(serializer.data)

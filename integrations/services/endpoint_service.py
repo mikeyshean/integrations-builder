@@ -59,8 +59,17 @@ class EndpointService:
     @staticmethod
     def list_models():
         """
-        Fetch list of Endpoint Models
+        Fetch list of all Endpoint Models
         """
         return Endpoint.objects.select_related(
             "model", "integration", "integration__category"
         ).filter(model__isnull=False)
+
+    @staticmethod
+    def get_models(id: int):
+        """
+        Fetch list models for a given endpoint id
+        """
+        return Endpoint.objects.select_related(
+            "model", "integration", "integration__category"
+        ).filter(id=id)

@@ -80,6 +80,10 @@ class IntegrationsApi:
         return EndpointService.list_models()
 
     @staticmethod
+    def get_endpoint_models(id: int):
+        return EndpointService.get_models(id=id)
+
+    @staticmethod
     def update_endpoint(id: int, path: str, method: str, integration_id: int):
         EndpointService.update(
             id=id, method=method, path=path, integration_id=integration_id
