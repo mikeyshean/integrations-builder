@@ -2,6 +2,7 @@ import logging
 
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
@@ -28,9 +29,9 @@ class IntegrationsViewSet(ViewSet):
 
     def create(self, request):
         try:
+            logger.warning(request.data)
             serializer = MutateIntegrationSerializer(data=request.data)
-            if not serializer.is_valid():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
 
             data = serializer.validated_data
             integration = IntegrationsApi.create_integration(
@@ -42,6 +43,11 @@ class IntegrationsViewSet(ViewSet):
             return Response(response_serializer.data)
         except UnprocessableError as e:
             return Response(e.message, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except ValidationError as e:
+            errors = {}
+            for k, v in e.detail.items():
+                errors[k] = map(lambda detail: detail.title(), v)
+            return Response(errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def retrieve(self, request, pk):
         integration = IntegrationsApi.get_integration_by_id(id=pk)

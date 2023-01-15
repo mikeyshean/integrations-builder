@@ -35,7 +35,7 @@ class ListIntegrationSerializer(serializers.ModelSerializer):
 
 class MutateIntegrationSerializer(serializers.Serializer):
     category_id = serializers.IntegerField()
-    domain_id = serializers.IntegerField()
+    domain_id = serializers.IntegerField(required=False)
     domain = serializers.CharField()
     name = serializers.CharField()
 
