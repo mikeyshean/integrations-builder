@@ -77,7 +77,6 @@ class IntegrationService:
         return Category.objects.all()
 
     @staticmethod
-    @staticmethod
     def delete_integration(id: int) -> bool:
         try:
             Integration.objects.get(id=id).delete()
