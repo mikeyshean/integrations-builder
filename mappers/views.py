@@ -53,7 +53,9 @@ class ModelViewSet(ViewSet):
     permission_classes = (IsAuthenticated,)
 
     def list(self, request):
-        models = ModelsApi.list()
+        params = request.query_params
+        category_id = params.get("categoryId")
+        models = ModelsApi.list(category_id=category_id)
         serializer = ModelSerializer(models, many=True)
         return Response(serializer.data)
 

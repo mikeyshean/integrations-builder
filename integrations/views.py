@@ -29,7 +29,6 @@ class IntegrationsViewSet(ViewSet):
 
     def create(self, request):
         try:
-            logger.warning(request.data)
             serializer = MutateIntegrationSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 

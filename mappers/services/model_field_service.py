@@ -1,7 +1,10 @@
-from typing import List
+import logging
+from typing import List, Union
 
 from mappers.exceptions import NotFoundError
 from mappers.models import Field, FieldTypeChoices, Model
+
+logger = logging.getLogger(__name__)
 
 
 class ModelFieldService:
@@ -17,8 +20,12 @@ class ModelFieldService:
         return Model.objects.filter(id=id).first()
 
     @staticmethod
-    def list_models() -> List[Model]:
-        return Model.objects.all()
+    def list_models(category_id: Union[int, None]) -> List[Model]:
+        qs = Model.objects.prefetch_related("fields", "fields__object_model")
+        if category_id:
+            qs = qs.filter(category_id=category_id)
+
+        return qs
 
     @staticmethod
     def create_field(
